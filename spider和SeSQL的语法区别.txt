@@ -1,0 +1,87 @@
+一、Spider语法
+
+################################
+val: number(float)/string(str)/sql(dict)
+col_unit: (agg_id, col_id, isDistinct(bool))
+val_unit: (unit_op, col_unit1, col_unit2)
+table_unit: (table_type, col_unit/sql)
+cond_unit: (not_op, op_id, val_unit, val1, val2)
+condition: [cond_unit1, 'and'/'or', cond_unit2, ...]
+sql {
+  'select': (isDistinct(bool), [(agg_id, val_unit), (agg_id, val_unit), ...])
+  'from': {'table_units': [table_unit1, table_unit2, ...], 'conds': condition}
+  'where': condition
+  'groupBy': [col_unit1, col_unit2, ...]
+  'orderBy': ('asc'/'desc', [val_unit1, val_unit2, ...])
+  'having': condition
+  'limit': None/limit value
+  'intersect': None/sql
+  'except': None/sql
+  'union': None/sql
+}
+
+CLAUSE_KEYWORDS = ('select', 'from', 'where', 'group', 'order', 'limit', 'intersect', 'union', 'except')
+JOIN_KEYWORDS = ('join', 'on', 'as')
+
+WHERE_OPS = ('not', 'between', '=', '>', '<', '>=', '<=', '!=', 'in', 'like', 'is', 'exists')
+UNIT_OPS = ('none', '-', '+', "*", '/')
+AGG_OPS = ('none', 'max', 'min', 'count', 'sum', 'avg')
+TABLE_TYPE = {
+    'sql': "sql",
+    'table_unit': "table_unit",
+}
+COND_OPS = ('and', 'or')
+SQL_OPS = ('intersect', 'union', 'except')
+ORDER_OPS = ('desc', 'asc')
+
+二、SeSQL语法
+
+################################
+val: number(float)/string(str)/sql(dict)
+col_unit: (agg_id, col_id, isdistinct(bool))
+val_unit: (unit_op, col_unit1, col_unit2)
+table_unit: (table_type, col_unit/sql)
+cond_unit: (agg_id, cond_op, val_unit, val1, val2)
+condition: [cond_unit1, 'and'/'or', cond_unit2, ...]
+sql {
+  'select': [(agg_id, val_unit), (agg_id, val_unit), ...]
+  'from': {'table_units': [table_unit1, table_unit2, ...], 'conds': condition}
+  'where': condition
+  'groupBy': [col_unit1, col_unit2, ...]
+  'orderBy': ('asc'/'desc', [(agg_id, val_unit), ...])
+  'having': condition
+  'limit': None/number(int)
+  'intersect': None/sql
+  'except': None/sql
+  'union': None/sql
+}
+
+CLAUSE_KEYWORDS = ('select', 'from', 'where', 'group', 'order', 'limit', 'intersect', 'union', 'except')
+JOIN_KEYWORDS = ('join', 'on', 'as')
+
+COND_OPS = ('not_in', 'between', '=', '>', '<', '>=', '<=', '!=', 'in', 'like', 'not_like')
+UNIT_OPS = ('none', '-', '+', "*", '/')
+AGG_OPS = ('none', 'max', 'min', 'count', 'sum', 'avg')
+TABLE_TYPE = {
+    'sql': "sql",
+    'table_unit': "table_unit",
+}
+
+LOGIC_AND_OR = ('and', 'or')
+SQL_OPS = ('intersect', 'union', 'except')
+ORDER_OPS = ('desc', 'asc')
+################################
+
+三、区别
+①cond_unit：Spider第一个是not_op，SeSQL是agg_id。
+Spider：cond_unit: (not_op, op_id, val_unit, val1, val2)
+SESQL：cond_unit: (agg_id, cond_op, val_unit, val1, val2)
+②COND_OPS：SeSQ删掉not，因为只有'in'、'like'前面可能有not，加了not_in和not_like。
+Spider：WHERE_OPS = ('not', 'between', '=', '>', '<', '>=', '<=', '!=', 'in', 'like', 'is', 'exists')
+SESQL：COND_OPS = ('not_in', 'between', '=', '>', '<', '>=', '<=', '!=', 'in', 'like', 'not_like')
+③select：SESQL删除isDistinct(bool)。
+Spider：(isDistinct(bool), [(agg_id, val_unit), (agg_id, val_unit), ...]) 
+SESQL：[(agg_id, val_unit), (agg_id, val_unit), ...]
+④order_by：SESQL加入agg_id。
+Spider：[val_unit1, val_unit2, ...]
+SESQL：[(agg_id, val_unit), ...]
